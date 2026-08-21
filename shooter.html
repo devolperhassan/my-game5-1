@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لعبة إطلاق النار - ميمز مصرية ومؤثرات</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: #050811;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            height: 100dvh;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .game-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            max-width: 480px;
+        }
+
+        .header-bar {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(8px);
+            border: 2px solid #38bdf8;
+            border-bottom: none;
+            border-radius: 14px 14px 0 0;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+        }
+
+        .score-box {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #38bdf8;
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-top {
+            background: #0f172a;
+            color: #38bdf8;
+            border: 1px solid #38bdf8;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-top:active {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+
+        .shop-btn-top {
+            border-color: #facc15;
+            color: #facc15;
+        }
+
+        .auto-btn-top {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            border: 2px solid #38bdf8;
+            border-radius: 0 0 14px 14px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+            background: #030712;
+            touch-action: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .shop-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 10, 23, 0.95);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 20;
+        }
+
+        .shop-title {
+            color: #facc15;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .shop-item {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid #38bdf8;
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .shop-item-info h4 {
+            color: #f8fafc;
+            font-size: 0.9rem;
+        }
+
+        .shop-item-info p {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+
+        .buy-btn {
+            background: #22c55e;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .buy-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        .close-shop-btn {
+            margin-top: 10px;
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .controls {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px 5px 15px;
+        }
+
+        .touch-hint {
+            color: #38bdf8;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .fire-btn {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ef4444 0%, #b91c1c 100%);
+            color: #fff;
+            border: 3px solid #f87171;
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fire-btn:active {
+            transform: scale(0.92);
+        }
+
+        .developer {
+            font-size: 0.8rem;
+            color: #38bdf8;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-card">
+        <div class="header-bar">
+            <div class="action-btns">
+                <button class="btn-top" id="btnPause">إيقاف ⏸️</button>
+                <button class="btn-top shop-btn-top" id="btnOpenShop">المتجر 🛒</button>
+                <button class="btn-top auto-btn-top" id="btnToggleAutoFire">آلي: تفعيل 🔫</button>
+            </div>
+            <div class="score-box">النقاط: <span id="scoreVal" style="color: #4ade80;">0</span></div>
+        </div>
+
+        <div class="game-container" id="touchArea">
+            <canvas id="gameCanvas"></canvas>
+
+            <div class="shop-overlay" id="shopOverlay">
+                <h2 class="shop-title">متجر التطويرات 🛒</h2>
+                
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <h4>سرعة المركبة 🏃</h4>
+                        <p>زيادة خفة استجابة اللمس</p>
+                    </div>
+                    <button class="buy-btn" id="buySpeedBtn">شراء (50)</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <h4>سرعة الطلقات ⚡</h4>
+                        <p>انطلاق أسرع للرصاص</p>
+                    </div>
+                    <button class="buy-btn" id="buyBulletSpeedBtn">شراء (40)</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <h4>سرعة الإطلاق 🔫</h4>
+                        <p>تقليل زمن الانتظار</p>
+                    </div>
+                    <button class="buy-btn" id="buyFireRateBtn">شراء (80)</button>
+                </div>
+
+                <button class="close-shop-btn" id="btnCloseShop">إغلاق وتكملة اللعب</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="touch-hint">👈 اسحب بإصبعك على الشاشة لتحريك السفينة</div>
+            <button class="fire-btn" id="btnFire">إطلاق 🔥</button>
+        </div>
+
+        <div class="developer">من تطوير المطور حسن خطاب</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreVal = document.getElementById('scoreVal');
+        const btnPause = document.getElementById('btnPause');
+        const btnOpenShop = document.getElementById('btnOpenShop');
+        const btnCloseShop = document.getElementById('btnCloseShop');
+        const btnToggleAutoFire = document.getElementById('btnToggleAutoFire');
+        const shopOverlay = document.getElementById('shopOverlay');
+        const touchArea = document.getElementById('touchArea');
+
+        const buySpeedBtn = document.getElementById('buySpeedBtn');
+        const buyBulletSpeedBtn = document.getElementById('buyBulletSpeedBtn');
+        const buyFireRateBtn = document.getElementById('buyFireRateBtn');
+
+        // مولد مؤثرات صوتية عبر Web Audio API
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playShootSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playExplosionSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.25);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.25);
+        }
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        let score = 0;
+        let gameOver = false;
+        let isPaused = false;
+        let inShop = false;
+        let autoFire = true;
+        let lastShootTime = 0;
+        let fireDelay = 220;
+
+        // ميمز مصرية تظهر عند تدمير الهدف وعند الخسارة
+        const killMemes = ["عاش يا وحش! 🔥", "في جبهتك! 😎", "اخلع يا زميلي! 🚀", "عالرايق 🤙", "يا بختك يا أخي! ⚡", "أبو الكباتن! 💪"];
+        const gameOverMemes = ["طب ليه كدة بس؟ 😭", "العب غيرها يا فنان 😅", "معلش هي الحرب كدة 💥", "يا حلاوة! 🤦‍♂️"];
+        let currentGameOverMeme = "";
+
+        const stars = Array.from({ length: 35 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2 + 0.5,
+            speed: Math.random() * 1.5 + 0.5
+        }));
+
+        const player = {
+            x: 30,
+            y: canvas.height / 2 - 12,
+            targetY: canvas.height / 2 - 12,
+            w: 32,
+            h: 24,
+            speed: 0.25,
+            bulletSpeed: 10
+        };
+
+        const bullets = [];
+        const enemies = [];
+        const particles = [];
+        const memeTexts = []; // نصوص الميمز الطائرة
+
+        let isDragging = false;
+
+        function updateTouchPos(touch) {
+            const rect = canvas.getBoundingClientRect();
+            let touchY = touch.clientY - rect.top - player.h / 2;
+            player.targetY = Math.max(0, Math.min(canvas.height - player.h, touchY));
+        }
+
+        touchArea.addEventListener('touchstart', (e) => {
+            if (gameOver || isPaused || inShop) return;
+            isDragging = true;
+            updateTouchPos(e.touches[0]);
+        });
+
+        touchArea.addEventListener('touchmove', (e) => {
+            if (!isDragging || gameOver || isPaused || inShop) return;
+            updateTouchPos(e.touches[0]);
+        });
+
+        touchArea.addEventListener('touchend', () => { isDragging = false; });
+
+        touchArea.addEventListener('mousemove', (e) => {
+            if (gameOver || isPaused || inShop) return;
+            const rect = canvas.getBoundingClientRect();
+            let mouseY = e.clientY - rect.top - player.h / 2;
+            player.targetY = Math.max(0, Math.min(canvas.height - player.h, mouseY));
+        });
+
+        const fireBtn = document.getElementById('btnFire');
+        fireBtn.addEventListener('touchstart', (e) => { e.preventDefault(); shoot(); });
+        fireBtn.addEventListener('click', shoot);
+
+        btnPause.addEventListener('click', togglePause);
+        btnOpenShop.addEventListener('click', openShop);
+        btnCloseShop.addEventListener('click', closeShop);
+
+        btnToggleAutoFire.addEventListener('click', () => {
+            autoFire = !autoFire;
+            btnToggleAutoFire.textContent = autoFire ? 'آلي: تفعيل 🔫' : 'آلي: إيقاف ⏸️';
+            btnToggleAutoFire.style.borderColor = autoFire ? '#4ade80' : '#ef4444';
+            btnToggleAutoFire.style.color = autoFire ? '#4ade80' : '#ef4444';
+        });
+
+        function togglePause() {
+            if (gameOver || inShop) return;
+            isPaused = !isPaused;
+            if (isPaused) {
+                btnPause.textContent = 'استئناف ▶️';
+                btnPause.style.borderColor = '#4ade80';
+                btnPause.style.color = '#4ade80';
+            } else {
+                btnPause.textContent = 'إيقاف ⏸️';
+                btnPause.style.borderColor = '#38bdf8';
+                btnPause.style.color = '#38bdf8';
+                loop();
+            }
+        }
+
+        function openShop() {
+            if (gameOver) return;
+            inShop = true;
+            shopOverlay.style.display = 'flex';
+            updateShopButtons();
+        }
+
+        function closeShop() {
+            inShop = false;
+            shopOverlay.style.display = 'none';
+            if (!isPaused && !gameOver) loop();
+        }
+
+        function updateShopButtons() {
+            buySpeedBtn.disabled = score < 50;
+            buyBulletSpeedBtn.disabled = score < 40;
+            buyFireRateBtn.disabled = score < 80 || fireDelay <= 80;
+        }
+
+        buySpeedBtn.addEventListener('click', () => {
+            if (score >= 50) {
+                score -= 50;
+                player.speed += 0.08;
+                scoreVal.textContent = score;
+                updateShopButtons();
+            }
+        });
+
+        buyBulletSpeedBtn.addEventListener('click', () => {
+            if (score >= 40) {
+                score -= 40;
+                player.bulletSpeed += 3;
+                scoreVal.textContent = score;
+                updateShopButtons();
+            }
+        });
+
+        buyFireRateBtn.addEventListener('click', () => {
+            if (score >= 80 && fireDelay > 80) {
+                score -= 80;
+                fireDelay -= 40;
+                scoreVal.textContent = score;
+                updateShopButtons();
+            }
+        });
+
+        function createExplosion(x, y, color) {
+            playExplosionSound();
+            for (let i = 0; i < 22; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    radius: Math.random() * 3.5 + 1.5,
+                    alpha: 1,
+                    color: color
+                });
+            }
+        }
+
+        function spawnMemeText(x, y) {
+            const randomMeme = killMemes[Math.floor(Math.random() * killMemes.length)];
+            memeTexts.push({
+                x: x,
+                y: y,
+                text: randomMeme,
+                alpha: 1,
+                vy: -1
+            });
+        }
+
+        function shoot() {
+            if (gameOver) {
+                resetGame();
+                return;
+            }
+            if (isPaused || inShop) return;
+
+            playShootSound();
+
+            bullets.push({
+                x: player.x + player.w,
+                y: player.y + player.h / 2,
+                w: 16,
+                h: 4,
+                speed: player.bulletSpeed
+            });
+        }
+
+        function spawnEnemy() {
+            if (gameOver || isPaused || inShop) return;
+            enemies.push({
+                x: canvas.width,
+                y: Math.random() * (canvas.height - 30),
+                w: 26,
+                h: 22,
+                speed: 1.8 + Math.random() * 2
+            });
+        }
+
+        setInterval(spawnEnemy, 950);
+
+        function resetGame() {
+            score = 0;
+            scoreVal.textContent = score;
+            gameOver = false;
+            isPaused = false;
+            inShop = false;
+            player.speed = 0.25;
+            player.bulletSpeed = 10;
+            fireDelay = 220;
+            btnPause.textContent = 'إيقاف ⏸️';
+            btnPause.style.borderColor = '#38bdf8';
+            btnPause.style.color = '#38bdf8';
+            bullets.length = 0;
+            enemies.length = 0;
+            particles.length = 0;
+            memeTexts.length = 0;
+            player.x = 30;
+            player.y = canvas.height / 2 - 12;
+            player.targetY = player.y;
+            loop();
+        }
+
+        function update() {
+            if (gameOver || isPaused || inShop) return;
+
+            player.y += (player.targetY - player.y) * player.speed;
+
+            if (autoFire) {
+                const now = Date.now();
+                if (now - lastShootTime >= fireDelay) {
+                    shoot();
+                    lastShootTime = now;
+                }
+            }
+
+            stars.forEach(star => {
+                star.x -= star.speed;
+                if (star.x < 0) star.x = canvas.width;
+            });
+
+            bullets.forEach((b, index) => {
+                b.x += b.speed;
+                if (b.x > canvas.width) bullets.splice(index, 1);
+            });
+
+            particles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.035;
+                if (p.alpha <= 0) particles.splice(index, 1);
+            });
+
+            memeTexts.forEach((m, index) => {
+                m.y += m.vy;
+                m.alpha -= 0.02;
+                if (m.alpha <= 0) memeTexts.splice(index, 1);
+            });
+
+            enemies.forEach((enemy, eIndex) => {
+                enemy.x -= enemy.speed;
+
+                if (player.x < enemy.x + enemy.w &&
+                    player.x + player.w > enemy.x &&
+                    player.y < enemy.y + enemy.h &&
+                    player.y + player.h > enemy.y) {
+                    createExplosion(player.x + player.w / 2, player.y + player.h / 2, '#38bdf8');
+                    createExplosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ef4444');
+                    currentGameOverMeme = gameOverMemes[Math.floor(Math.random() * gameOverMemes.length)];
+                    gameOver = true;
+                }
+
+                bullets.forEach((bullet, bIndex) => {
+                    if (bullet.x < enemy.x + enemy.w &&
+                        bullet.x + bullet.w > enemy.x &&
+                        bullet.y < enemy.y + enemy.h &&
+                        bullet.y + bullet.h > enemy.y) {
+                        
+                        createExplosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#facc15');
+                        spawnMemeText(enemy.x, enemy.y);
+                        enemies.splice(eIndex, 1);
+                        bullets.splice(bIndex, 1);
+                        score += 10;
+                        scoreVal.textContent = score;
+                    }
+                });
+
+                if (enemy.x + enemy.w < 0) {
+                    enemies.splice(eIndex, 1);
+                }
+            });
+        }
+
+        function drawPlayer(x, y) {
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.moveTo(x, y + 8);
+            ctx.lineTo(x - 8 - Math.random() * 4, y + 12);
+            ctx.lineTo(x, y + 16);
+            ctx.fill();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.moveTo(x + 32, y + 12);
+            ctx.lineTo(x, y);
+            ctx.lineTo(x + 8, y + 12);
+            ctx.lineTo(x, y + 24);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#e0f2fe';
+            ctx.beginPath();
+            ctx.arc(x + 18, y + 12, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawEnemy(x, y) {
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(x, y + 11);
+            ctx.lineTo(x + 26, y);
+            ctx.lineTo(x + 18, y + 11);
+            ctx.lineTo(x + 26, y + 22);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#facc15';
+            ctx.fillRect(x + 5, y + 9, 4, 4);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#ffffff';
+            stars.forEach(star => {
+                ctx.globalAlpha = star.size / 2.5;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+            ctx.globalAlpha = 1.0;
+
+            if (!gameOver) drawPlayer(player.x, player.y);
+            enemies.forEach(e => drawEnemy(e.x, e.y));
+
+            bullets.forEach(b => {
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+            });
+
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // رسم الميمز العائمة
+            memeTexts.forEach(m => {
+                ctx.fillStyle = '#facc15';
+                ctx.font = 'bold 13px Segoe UI';
+                ctx.globalAlpha = m.alpha;
+                ctx.fillText(m.text, m.x, m.y);
+            });
+            ctx.globalAlpha = 1.0;
+
+            if (isPaused && !gameOver && !inShop) {
+                ctx.fillStyle = 'rgba(7, 10, 23, 0.85)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#4ade80';
+                ctx.font = 'bold 22px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('متوقفة مؤقتاً ⏸️', canvas.width / 2, canvas.height / 2);
+            }
+
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(7, 10, 23, 0.9)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#ef4444';
+                ctx.font = 'bold 24px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('انتهت اللعبة! ❌', canvas.width / 2, canvas.height / 2 - 25);
+
+                ctx.fillStyle = '#facc15';
+                ctx.font = 'bold 18px Segoe UI';
+                ctx.fillText(currentGameOverMeme, canvas.width / 2, canvas.height / 2 + 10);
+
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = '14px Segoe UI';
+                ctx.fillText('اضغط على الشاشة لإعادة اللعب', canvas.width / 2, canvas.height / 2 + 45);
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            if (!gameOver && !isPaused && !inShop) requestAnimationFrame(loop);
+        }
+
+        canvas.addEventListener('touchstart', () => { if (gameOver) resetGame(); });
+
+        loop();
+    </script>
+</body>
+</html>
